@@ -1,4 +1,7 @@
 #!/bin/bash
+# Dependencies:
+# - bash
+# - wget
 
 PROGNAME=$(basename $0)
 # Colors
@@ -15,8 +18,12 @@ REV=`tput smso`
 file=
 verbose=0
 
+# Some Vars
 
-#Help function
+# Command to get remote version number, here from GitHub
+#NEW_BUILD_VERSION=`wget -O- -q https://raw.githubusercontent.com/tiramisusolutions/dockerfiles/master/mr.caddy/VERSION`
+
+# Functions
 function HELP()
 {
   echo -e \\n"Help documentation for ${BOLD}${SCRIPT}.${NORM}"\\n
@@ -36,36 +43,16 @@ function HELP()
 
 
 ### Start getopts code ###
-while getopts :v:m:u:g:n:t:p:h FLAG; do
+while getopts :v:n:t:p:h FLAG; do
   case $FLAG in
     v)  #set option "version"
-      VERSION=$OPTARG
-      echo "VERSION = $VERSION"
-      ;;
-    m)  #set option "mail"
-      MAILADRES=$OPTARG
-      echo "-m used: $OPTARG"
-      echo "MAILADRES = $MAILADRES"
-      ;;
-    u)  #set option "user"
-      USER=$OPTARG
-      echo "-u used: $OPTARG"
-      echo "USER = $USER"
-      ;;
-    g)  #set option "group"
-      GROUP=$OPTARG
-      echo "-g used: $OPTARG"
-      echo "GROUP = $GROUP"
+      NEW_VERSION=$OPTARG
+      echo "NEW_VERSION = $NEW_VERSION"
       ;;
     n) #set option "name"
       NAME=$OPTARG
       #echo "-n used: $OPTARG"
       echo "NAME = $NAME"
-      ;;
-    t) #set option "target dir"
-      TARGETDIR=$OPTARG
-      echo "-d used: $OPTARG"
-      echo "NAME = $TARGETDIR"
       ;;
     p) # set prefix
       PREFIX=$OPTARG
@@ -90,4 +77,4 @@ shift $((OPTIND-1))  #This tells getopts to move on to the next argument.
 
 ### End getopts code ###
 #echo "deploy -n "$NAME" -v "$VERSION""
-echo "deploy "$NAME":"$VERSION""
+echo "deploy "$NAME":"$NEW_VERSION""
