@@ -49,7 +49,8 @@ help_cmd() {
 
 # Check if we have the image already locally
 check_imgage_local(){
-  if [ ! -z $(docker images -q ${APP_IMG_NAME}:${VERSION_TAG}) ]; then
+  #if [ ! -z $(docker images -q ${APP_IMG_NAME}:${VERSION_TAG}) ]; then
+  if [ ! -z $(docker images --format "{{.Repository}}:{{.Tag}}"); then
   : # Do nothing we have the image already local
 else
   echo "Pulling the Image: "$APP_IMG_NAME":"$NEW_VERSION""
