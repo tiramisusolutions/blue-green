@@ -57,6 +57,10 @@ else
 fi
 }
 
+# Check local image
+if docker images --format "{{.Repository}}:{{.Tag}}" | grep -q redbuild:latest; then echo "yes"
+fi
+
 # Check the ports, to find out if we are on blue or green
 check_local_ports(){
   if [ ! -z $CURRENT_CONTAINERS ]; then
