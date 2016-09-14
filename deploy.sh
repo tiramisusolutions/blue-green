@@ -19,13 +19,19 @@ file=
 verbose=0
 
 # Some Vars
-
+# Official name of image, like on Docker Registry
+APP_IMG_NAME=redbuild
+# Pre-defined port for green ct
+GREEN_PORT=8080
+# Pre-defined port for blue ct
+BLUE_PORT=8081
+BUILD_VERSION=`docker inspect -f '{{.Config.Labels.build_version}}' $APP_IMG_NAME `
 # Command to get remote version number, here from GitHub
 #NEW_BUILD_VERSION=`wget -O- -q https://raw.githubusercontent.com/tiramisusolutions/dockerfiles/master/mr.caddy/VERSION`
 
 # Functions
-function HELP()
-{
+# Help
+help_cmd() {
   echo -e \\n"Help documentation for ${BOLD}${SCRIPT}.${NORM}"\\n
   echo -e "${REV}Basic usage:${NORM} ${BOLD}$SCRIPT build_deb.bash${NORM}"\\n
   echo "Command line switches are optional. The following switches are recognized."
@@ -41,6 +47,30 @@ function HELP()
   exit 1
 }
 
+# Check if we have the image already locally
+check_imgage_local(){
+  if [ ! -z $(docker images -q ${APP_IMG_NAME}:${VERSION_TAG}) ]; then
+  : # Do nothing we have the image already local
+else
+  echo "Pulling the Image: "$APP_IMG_NAME":"$NEW_VERSION""
+fi
+}
+
+# Check the ports, to find out if we are on blue or green
+check_local_ports(){
+  if [ ! -z $CURRENT_CONTAINERS ]; then
+    if [[ "$CURRENT_PORT" -eq "$GREEN_PORT" ]]; then
+      echo "We are running on green build:[HostPort]:${GREEN_PORT} on version ${BUILD_VERSION} "
+    elif [[ "$CURRENT_PORT" -eq "$BLUE_PORT" ]]; then
+      echo "We are running on blue build:[HostPort]:${BLUE_PORT} on version ${BUILD_VERSION}"
+    else
+      echo "We have the image but it is not running on Green:"${GREEN_PORT}" or on Blue:"${BLUE_PORT}""
+    fi
+    
+  else
+    echo "We have the image but it is not running"
+  fi
+}
 
 ### Start getopts code ###
 while getopts :v:n:t:p:h FLAG; do
@@ -50,9 +80,9 @@ while getopts :v:n:t:p:h FLAG; do
       echo "NEW_VERSION = $NEW_VERSION"
       ;;
     n) #set option "name"
-      NAME=$OPTARG
+      APP_IMG_NAME=$OPTARG
       #echo "-n used: $OPTARG"
-      echo "NAME = $NAME"
+      echo "APP_IMG_NAME = $APP_IMG_NAME"
       ;;
     p) # set prefix
       PREFIX=$OPTARG
@@ -76,5 +106,8 @@ done
 shift $((OPTIND-1))  #This tells getopts to move on to the next argument.
 
 ### End getopts code ###
+
 #echo "deploy -n "$NAME" -v "$VERSION""
-echo "deploy "$NAME":"$NEW_VERSION""
+#echo "deploy "$APP_IMG_NAME":"$NEW_VERSION""
+echo "Checking for image, please stand by"
+check_imgage_local
